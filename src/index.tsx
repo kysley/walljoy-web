@@ -1,11 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Provider as UrqlProvider} from 'urql';
+
 import App from './App';
 import './index.css';
+import {urqlClient} from './utils';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <UrqlProvider value={urqlClient}>
+      <App />
+    </UrqlProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

@@ -1,12 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
+import {BrowserRouter, Route, Routes, useSearchParams} from 'react-router-dom';
 import logo from './logo.svg';
 import './App.css';
+import {useRegisterMutation, useWallpapersQuery} from './graphql/gen';
 
 interface AppProps {}
+
+function Register() {
+  useRegisterMutation();
+  useSearchParams();
+  return <div>register</div>;
+}
+
+function Home() {
+  const [res] = useWallpapersQuery();
+  return (
+    <>
+      {res.data?.wallpapers?.map((wp) => (
+        <img
+          src={wp?.u_url}
+          alt={wp?.id}
+          style={{width: '40vw', height: 'auto'}}
+        />
+      ))}
+    </>
+  );
+}
+
+function Header() {}
 
 function App({}: AppProps) {
   // Create the count state.
   const [count, setCount] = useState(0);
+
   // Create the counter (+1 every second).
   useEffect(() => {
     const timer = setTimeout(() => setCount(count + 1), 1000);
@@ -15,25 +41,11 @@ function App({}: AppProps) {
   // Return the App component.
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>
-          Page has been open for <code>{count}</code> seconds.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

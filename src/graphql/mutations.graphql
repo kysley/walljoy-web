@@ -1,0 +1,6 @@
+mutation register($input: LoginInput!) {
+  register(input: $input) {
+    token
+    refreshToken
+  }
+}
