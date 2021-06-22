@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import {Provider as UrqlProvider} from 'urql';
 
 import App from './App';
-import './index.css';
 import {urqlClient} from './utils';
 
 ReactDOM.render(
