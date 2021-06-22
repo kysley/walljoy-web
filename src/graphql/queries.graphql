@@ -3,5 +3,21 @@ query wallpapers {
     u_url
     id
     createdAt
+    collection {
+      id
+      name
+    }
+  }
+}
+
+query collection($id: Int, $name: String) {
+  collection(where: {id: $id, name: $name}) {
+    id
+    name
+    wallpapers {
+      u_url
+      id
+      createdAt
+    }
   }
 }

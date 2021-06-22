@@ -31,6 +31,28 @@ export type AccountDevicesArgs = {
   after?: Maybe<DeviceWhereUniqueInput>;
 };
 
+export type Collection = {
+  __typename?: 'Collection';
+  name: Scalars['String'];
+  id: Scalars['Int'];
+  official: Scalars['Boolean'];
+  wallpapers: Array<Wallpaper>;
+  updatedAt: Scalars['DateTime'];
+  createdAt: Scalars['DateTime'];
+};
+
+export type CollectionWallpapersArgs = {
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  before?: Maybe<WallpaperWhereUniqueInput>;
+  after?: Maybe<WallpaperWhereUniqueInput>;
+};
+
+export type CollectionWhere = {
+  name?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+};
+
 export type Credentials = {
   __typename?: 'Credentials';
   token: Scalars['String'];
@@ -79,14 +101,25 @@ export type MutationAuthenticateDeviceArgs = {
 export type Query = {
   __typename?: 'Query';
   wallpapers?: Maybe<Array<Maybe<Wallpaper>>>;
+  collection?: Maybe<Collection>;
+};
+
+export type QueryCollectionArgs = {
+  where: CollectionWhere;
 };
 
 export type Wallpaper = {
   __typename?: 'Wallpaper';
-  id: Scalars['String'];
+  collection?: Maybe<Collection>;
+  id: Scalars['Int'];
   u_url: Scalars['String'];
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
+};
+
+export type WallpaperWhereUniqueInput = {
+  id?: Maybe<Scalars['Int']>;
+  u_url?: Maybe<Scalars['String']>;
 };
 
 export type RegisterMutationVariables = Exact<{
@@ -109,9 +142,31 @@ export type WallpapersQuery = {__typename?: 'Query'} & {
         {__typename?: 'Wallpaper'} & Pick<
           Wallpaper,
           'u_url' | 'id' | 'createdAt'
-        >
+        > & {
+            collection?: Maybe<
+              {__typename?: 'Collection'} & Pick<Collection, 'id' | 'name'>
+            >;
+          }
       >
     >
+  >;
+};
+
+export type CollectionQueryVariables = Exact<{
+  id?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+}>;
+
+export type CollectionQuery = {__typename?: 'Query'} & {
+  collection?: Maybe<
+    {__typename?: 'Collection'} & Pick<Collection, 'id' | 'name'> & {
+        wallpapers: Array<
+          {__typename?: 'Wallpaper'} & Pick<
+            Wallpaper,
+            'u_url' | 'id' | 'createdAt'
+          >
+        >;
+      }
   >;
 };
 
@@ -135,6 +190,10 @@ export const WallpapersDocument = gql`
       u_url
       id
       createdAt
+      collection {
+        id
+        name
+      }
     }
   }
 `;
@@ -144,6 +203,28 @@ export function useWallpapersQuery(
 ) {
   return Urql.useQuery<WallpapersQuery>({
     query: WallpapersDocument,
+    ...options,
+  });
+}
+export const CollectionDocument = gql`
+  query collection($id: Int, $name: String) {
+    collection(where: {id: $id, name: $name}) {
+      id
+      name
+      wallpapers {
+        u_url
+        id
+        createdAt
+      }
+    }
+  }
+`;
+
+export function useCollectionQuery(
+  options: Omit<Urql.UseQueryArgs<CollectionQueryVariables>, 'query'> = {},
+) {
+  return Urql.useQuery<CollectionQuery>({
+    query: CollectionDocument,
     ...options,
   });
 }
