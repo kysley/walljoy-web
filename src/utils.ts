@@ -19,3 +19,8 @@ export const urqlClient = createClient({
     };
   },
 });
+
+export const saveTokens = (token: string, refreshToken: string) => {
+  localStorage.setItem('token', token);
+  localStorage.setItem('refreshToken', refreshToken);
+};

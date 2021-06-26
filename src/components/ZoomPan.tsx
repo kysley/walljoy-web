@@ -24,7 +24,7 @@ export const ScrollLock: React.FC = ({children}) => {
   return children;
 };
 
-const PanZoomModal = ({close, children, src}) => {
+const PanZoomModal = ({close, children, $src}) => {
   const portalImageRef = useRef(null);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const PanZoomModal = ({close, children, src}) => {
       onDrag: ({offset: [x, y]}) => api({x, y}),
       onWheel: ({event, offset: [, y]}) => {
         event.preventDefault();
-        api({zoom: -y / 650});
+        api({zoom: -y / 1050});
       },
     },
     {domTarget: portalImageRef, eventOptions: {passive: false}},
@@ -80,7 +80,7 @@ const PanZoomModal = ({close, children, src}) => {
               y,
               zoom,
               scale: to([scale, zoom], (s, z) => s + z),
-              backgroundImage: `url(${src})`,
+              backgroundImage: `url(${$src})`,
               height: '100%',
               width: '100%',
               cursor: 'grab',
@@ -92,7 +92,7 @@ const PanZoomModal = ({close, children, src}) => {
   );
 };
 
-export const PanZoom: React.FC = ({element, src}) => {
+export const PanZoom: React.FC = ({element, $src}) => {
   const [expanded, setExpanded] = useState(false);
 
   const handleImageClick = () => {
@@ -102,7 +102,9 @@ export const PanZoom: React.FC = ({element, src}) => {
   return (
     <>
       <div onClick={handleImageClick}>{element}</div>
-      {expanded && <PanZoomModal close={() => setExpanded(false)} src={src} />}
+      {expanded && (
+        <PanZoomModal close={() => setExpanded(false)} $src={$src} />
+      )}
     </>
   );
 };

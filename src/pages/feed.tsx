@@ -1,19 +1,60 @@
 import {styled} from '@stitches/react';
-import React from 'react';
+import React, {useState} from 'react';
 
 import {WallpaperCard} from '../components/WallpaperCard';
-import {useWallpapersQuery} from '../graphql/gen';
+import {useFeedQuery, QueryFeedArgs} from '../graphql/gen';
+
+type PageProps = {
+  variables: QueryFeedArgs;
+  isLastPage: boolean;
+  onLoadMore: (cursor: number) => void;
+};
+const Page = ({variables, isLastPage, onLoadMore}: PageProps) => {
+  const [{data, fetching}] = useFeedQuery({
+    variables,
+  });
+
+  return (
+    <>
+      {data?.feed?.map((wp) => (
+        <WallpaperCard key={wp.id} wallpaper={wp} />
+      ))}
+      {(isLastPage && fetching) ||
+        (isLastPage && (
+          <button
+            onClick={() => {
+              if (data?.feed) {
+                onLoadMore(data.feed[data.feed.length - 1]?.id!);
+              }
+            }}
+          >
+            load more
+          </button>
+        ))}
+    </>
+  );
+};
 
 export const Feed = () => {
-  const [res] = useWallpapersQuery();
+  const [pageVariables, setPageVariables] = useState([
+    {
+      limit: 15,
+      cursor: null as null | number,
+    },
+  ]);
 
-  if (res.error) {
-    return <span>something went wrong!</span>;
-  }
   return (
     <Container>
-      {res.data?.wallpapers!.map((wp) => (
-        <WallpaperCard key={wp.id} wallpaper={wp} />
+      {console.log('hello')}
+      {pageVariables.map((variables, i) => (
+        <Page
+          key={'' + variables.cursor}
+          variables={variables}
+          isLastPage={i === pageVariables.length}
+          onLoadMore={(cursor) =>
+            setPageVariables([...pageVariables, {cursor, limit: 15}])
+          }
+        />
       ))}
     </Container>
   );

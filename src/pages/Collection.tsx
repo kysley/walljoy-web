@@ -24,7 +24,7 @@ export const Collection = () => {
     <>
       <h1>{res.data?.collection?.name}</h1>
       {res.data?.collection?.wallpapers.map((wp) => (
-        <WallpaperCard key={wp.id} wallpaper={wp} collectionView />
+        <WallpaperCard key={wp.id} wallpaper={wp} standalone />
       ))}
     </>
   );

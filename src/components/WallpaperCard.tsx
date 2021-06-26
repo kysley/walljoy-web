@@ -2,6 +2,7 @@ import {styled} from '@stitches/react';
 import React from 'react';
 import {Link} from 'react-router-dom';
 import {CgArrowLongRight} from 'react-icons/cg';
+import {when} from 'whendys';
 
 import type {Wallpaper} from '../graphql/gen';
 import {PanZoom} from './ZoomPan';
@@ -9,10 +10,10 @@ import {Stack} from './Stack';
 
 export const WallpaperCard = ({
   wallpaper,
-  collectionView,
+  standalone,
 }: {
   wallpaper: Wallpaper;
-  collectionView: boolean;
+  standalone: boolean;
 }) => {
   const {id, createdAt, u_url, collection} = wallpaper;
 
@@ -20,18 +21,25 @@ export const WallpaperCard = ({
     <Container>
       <LinkContainer direction="row">
         <Link to={`w/${id}`}>
-          <span style={{color: 'green'}}>
-            {daysBetween(new Date(createdAt), new Date())} day(s) ago
-          </span>
+          <span style={{color: 'green'}}>{when(createdAt)}</span>
         </Link>
-        {!collectionView && (
+        {!standalone && (
           <>
-            <CgArrowLongRight size="35px" />
-            <Link to={`c/${collection?.id}`}>{collection?.name}</Link>
+            {collection.map((collection) => (
+              <>
+                <CgArrowLongRight size="35px" />
+                <Link
+                  to={`c/${collection?.id}`}
+                  state={{back: window.location.pathname}}
+                >
+                  {collection?.name}
+                </Link>
+              </>
+            ))}
           </>
         )}
       </LinkContainer>
-      <PanZoom src={u_url} element={<Image src={u_url} alt="" />} />
+      <PanZoom $src={u_url} element={<Image src={u_url} alt="" />} />
     </Container>
   );
 };

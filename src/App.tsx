@@ -2,8 +2,11 @@ import React from 'react';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import {global} from '@stitches/react';
 
-import {Feed} from './pages/feed';
+import {Feed} from './pages/Feed';
 import {Collection} from './pages/Collection';
+import {Wallpaper} from './pages/Wallpaper';
+import {Register} from './pages/Register';
+import {Header} from './components/Header';
 
 interface AppProps {}
 
@@ -17,14 +20,17 @@ globalStyles();
 
 function App({}: AppProps) {
   return (
-    <div className="App">
-      <BrowserRouter>
+    <BrowserRouter>
+      <div className="App">
+        <Header />
         <Routes>
           <Route path="/" element={<Feed />} />
-          <Route path="/c/:collection" element={<Collection />} />
+          <Route path="c/:collection" element={<Collection />} />
+          <Route path="w/:id" element={<Wallpaper />} />
+          <Route path="register" element={<Register />} />
         </Routes>
-      </BrowserRouter>
-    </div>
+      </div>
+    </BrowserRouter>
   );
 }
 
