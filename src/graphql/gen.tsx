@@ -53,6 +53,10 @@ export type CollectionWhere = {
   id?: Maybe<Scalars['Int']>;
 };
 
+export type CollectionWhereUniqueInput = {
+  id?: Maybe<Scalars['Int']>;
+};
+
 export type Credentials = {
   __typename?: 'Credentials';
   token: Scalars['String'];
@@ -80,7 +84,7 @@ export type LoginInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   refreshCredentials: Credentials;
-  register: Credentials;
+  register?: Maybe<Credentials>;
   signin?: Maybe<Account>;
   authenticateDevice?: Maybe<Scalars['Boolean']>;
 };
@@ -98,23 +102,49 @@ export type MutationAuthenticateDeviceArgs = {
   deviceId?: Maybe<Scalars['String']>;
 };
 
+export type PaginationArgs = {
+  take?: Scalars['Int'];
+  cursor: Scalars['Int'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  feed?: Maybe<Array<Maybe<Wallpaper>>>;
   wallpapers?: Maybe<Array<Maybe<Wallpaper>>>;
   collection?: Maybe<Collection>;
+  wallpaper?: Maybe<Wallpaper>;
+};
+
+export type QueryFeedArgs = {
+  where?: Maybe<PaginationArgs>;
+};
+
+export type QueryWallpapersArgs = {
+  where?: Maybe<PaginationArgs>;
 };
 
 export type QueryCollectionArgs = {
   where: CollectionWhere;
 };
 
+export type QueryWallpaperArgs = {
+  where: WallpaperWhereUniqueInput;
+};
+
 export type Wallpaper = {
   __typename?: 'Wallpaper';
-  collection?: Maybe<Collection>;
+  collection: Array<Collection>;
   id: Scalars['Int'];
   u_url: Scalars['String'];
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
+};
+
+export type WallpaperCollectionArgs = {
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  before?: Maybe<CollectionWhereUniqueInput>;
+  after?: Maybe<CollectionWhereUniqueInput>;
 };
 
 export type WallpaperWhereUniqueInput = {
@@ -127,13 +157,26 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 export type RegisterMutation = {__typename?: 'Mutation'} & {
-  register: {__typename?: 'Credentials'} & Pick<
-    Credentials,
-    'token' | 'refreshToken'
+  register?: Maybe<
+    {__typename?: 'Credentials'} & Pick<Credentials, 'token' | 'refreshToken'>
   >;
 };
 
-export type WallpapersQueryVariables = Exact<{[key: string]: never}>;
+export type SigninMutationVariables = Exact<{[key: string]: never}>;
+
+export type SigninMutation = {__typename?: 'Mutation'} & {
+  signin?: Maybe<
+    {__typename?: 'Account'} & Pick<Account, 'email' | 'id'> & {
+        devices: Array<
+          {__typename?: 'Device'} & Pick<Device, 'name' | 'id' | 'authorized'>
+        >;
+      }
+  >;
+};
+
+export type WallpapersQueryVariables = Exact<{
+  where?: Maybe<PaginationArgs>;
+}>;
 
 export type WallpapersQuery = {__typename?: 'Query'} & {
   wallpapers?: Maybe<
@@ -143,7 +186,7 @@ export type WallpapersQuery = {__typename?: 'Query'} & {
           Wallpaper,
           'u_url' | 'id' | 'createdAt'
         > & {
-            collection?: Maybe<
+            collection: Array<
               {__typename?: 'Collection'} & Pick<Collection, 'id' | 'name'>
             >;
           }
@@ -170,6 +213,37 @@ export type CollectionQuery = {__typename?: 'Query'} & {
   >;
 };
 
+export type WallpaperQueryVariables = Exact<{
+  id?: Maybe<Scalars['Int']>;
+}>;
+
+export type WallpaperQuery = {__typename?: 'Query'} & {
+  wallpaper?: Maybe<
+    {__typename?: 'Wallpaper'} & Pick<Wallpaper, 'id' | 'u_url' | 'createdAt'>
+  >;
+};
+
+export type FeedQueryVariables = Exact<{
+  where?: Maybe<PaginationArgs>;
+}>;
+
+export type FeedQuery = {__typename?: 'Query'} & {
+  feed?: Maybe<
+    Array<
+      Maybe<
+        {__typename?: 'Wallpaper'} & Pick<
+          Wallpaper,
+          'u_url' | 'id' | 'createdAt'
+        > & {
+            collection: Array<
+              {__typename?: 'Collection'} & Pick<Collection, 'id' | 'name'>
+            >;
+          }
+      >
+    >
+  >;
+};
+
 export const RegisterDocument = gql`
   mutation register($input: LoginInput!) {
     register(input: $input) {
@@ -184,9 +258,28 @@ export function useRegisterMutation() {
     RegisterDocument,
   );
 }
+export const SigninDocument = gql`
+  mutation signin {
+    signin {
+      email
+      id
+      devices {
+        name
+        id
+        authorized
+      }
+    }
+  }
+`;
+
+export function useSigninMutation() {
+  return Urql.useMutation<SigninMutation, SigninMutationVariables>(
+    SigninDocument,
+  );
+}
 export const WallpapersDocument = gql`
-  query wallpapers {
-    wallpapers {
+  query wallpapers($where: PaginationArgs) {
+    wallpapers(where: $where) {
       u_url
       id
       createdAt
@@ -227,4 +320,38 @@ export function useCollectionQuery(
     query: CollectionDocument,
     ...options,
   });
+}
+export const WallpaperDocument = gql`
+  query wallpaper($id: Int) {
+    wallpaper(where: {id: $id}) {
+      id
+      u_url
+      createdAt
+    }
+  }
+`;
+
+export function useWallpaperQuery(
+  options: Omit<Urql.UseQueryArgs<WallpaperQueryVariables>, 'query'> = {},
+) {
+  return Urql.useQuery<WallpaperQuery>({query: WallpaperDocument, ...options});
+}
+export const FeedDocument = gql`
+  query Feed($where: PaginationArgs) {
+    feed(where: $where) {
+      u_url
+      id
+      createdAt
+      collection {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export function useFeedQuery(
+  options: Omit<Urql.UseQueryArgs<FeedQueryVariables>, 'query'> = {},
+) {
+  return Urql.useQuery<FeedQuery>({query: FeedDocument, ...options});
 }

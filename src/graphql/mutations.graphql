@@ -4,3 +4,15 @@ mutation register($input: LoginInput!) {
     refreshToken
   }
 }
+
+mutation signin {
+  signin {
+    email
+    id
+    devices {
+      name
+      id
+      authorized
+    }
+  }
+}
