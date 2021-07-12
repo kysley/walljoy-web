@@ -1,19 +1,55 @@
 import React, {useEffect} from 'react';
 import {useForm} from 'react-hook-form';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {styled} from '@stitches/react';
 
-import {useRegisterMutation} from '../graphql/gen';
+import logoReference from '/Smile_Dark.svg';
+
+import {
+  useAuthenticateSessionMutation,
+  useRegisterMutation,
+} from '../graphql/gen';
 import {saveTokens} from '../utils';
+import {Stack} from '../components/Stack';
+import {Button} from '../components/Button';
 
-export const Register = () => {
-  const location = useLocation();
-  const [dat, mut] = useRegisterMutation();
-  const {register, handleSubmit} = useForm();
+export const SessionGate = ({children}) => {
+  const [{fetching, data: authData}, authenticateSession] =
+    useAuthenticateSessionMutation();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
-    console.log({sId: qs.get('sId')});
+    const sessionId = qs.get('sId');
+
+    if (sessionId) {
+      console.log({sessionId});
+      authenticateSession({sId: sessionId});
+    }
   }, []);
+
+  if (!fetching && authData?.authenticateSession?.valueOf()) {
+    // navigate('./');
+  }
+
+  return (
+    <>
+      {/* <Container> */}
+      {fetching && <span>Loading...</span>}
+      {location.search.indexOf('sId') === -1 && <span>bad url yo</span>}
+      {!authData?.authenticateSession && !fetching && (
+        <span>maybe bad session</span>
+      )}
+      {/* </Container> */}
+      {authData?.authenticateSession?.valueOf() && children}
+    </>
+  );
+};
+
+export const Register = () => {
+  const {register, handleSubmit} = useForm();
+  const [dat, mut] = useRegisterMutation();
 
   const handleFormSubmit = async (data: any) => {
     const qs = new URLSearchParams(location.search);
@@ -29,23 +65,50 @@ export const Register = () => {
       saveTokens(token, refresh);
     }
   };
-
   return (
-    <div>
-      <h1>let's get you started!</h1>
-      <span>
-        all we need is an email, you will be authenticated with your current
-        device
-      </span>
-      <form onSubmit={handleSubmit(handleFormSubmit)}>
-        <input {...register('email')} placeholder="Email" />
-        <button type="submit">Register</button>
-      </form>
+    <SessionGate>
+      <Wrapper>
+        <Container>
+          <img
+            src={logoReference}
+            style={{height: '50px', width: '50px', marginBottom: '75px'}}
+          />
+          <Stack>
+            <h1>Let's get you started!</h1>
+            <span>
+              All we need is an email, you will be authenticated with your
+              current device
+            </span>
+            <form onSubmit={handleSubmit(handleFormSubmit)}>
+              <input {...register('email')} placeholder="Email" />
+              <Button type="submit">Register</Button>
+            </form>
 
-      <div>
-        <h2>already have an account?</h2>
-        <Link to="/auth">Add this device to your account</Link>
-      </div>
-    </div>
+            <div>
+              <h2>already have an account?</h2>
+              <Link to={`/authorize${location.search}`}>
+                Add this device to your account
+              </Link>
+            </div>
+          </Stack>
+        </Container>
+      </Wrapper>
+    </SessionGate>
   );
 };
+
+const Wrapper = styled('div', {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+const Container = styled('div', {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  background: '#e4e4e4',
+  padding: '2em',
+  borderRadius: '5px',
+});
