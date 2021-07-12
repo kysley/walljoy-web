@@ -1,8 +1,8 @@
 import {styled} from '@stitches/react';
-import React from 'react';
-import {CgArrowLongLeft} from 'react-icons/cg';
+import React, {useEffect} from 'react';
+import {CgArrowLongLeft, CgUser} from 'react-icons/cg';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
-import {useSigninMutation} from '../graphql/gen';
+import {useSigninQuery} from '../graphql/gen';
 import {Stack} from './Stack';
 
 const BackButton = ({children}) => {
@@ -32,34 +32,25 @@ const BackButton = ({children}) => {
 };
 
 export const Header = () => {
-  const [data, mut] = useSigninMutation();
-  const location = useLocation();
+  const [res] = useSigninQuery();
 
   return (
     <Container>
-      <Stack direction="row">
-        {location.pathname !== '/' ? (
-          <BackButton>
-            <CgArrowLongLeft size="40" />
-          </BackButton>
-        ) : (
-          <div
-            style={{
-              background: 'black',
-              height: 50,
-              width: 150,
-              color: 'white',
-              fontSize: '2.5em',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-            }}
-          >
-            walljoy
-          </div>
-        )}
-      </Stack>
+      <div
+        style={{
+          background: 'black',
+          height: 50,
+          width: 150,
+          color: 'white',
+          fontSize: '2.5em',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 700,
+        }}
+      >
+        walljoy
+      </div>
       <Stack direction="row">
         <Link to="/">Feed</Link>
         <DropdownTarget>
@@ -71,13 +62,17 @@ export const Header = () => {
           </Dropdown>
         </DropdownTarget>
       </Stack>
+      <div>
+        <CgUser size="24" />
+        {res.data?.signin?.email}
+      </div>
     </Container>
   );
 };
 
 const Container = styled('header', {
   display: 'grid',
-  gridTemplateColumns: '1fr auto 2fr auto',
+  gridTemplateColumns: 'auto auto auto',
   alignItems: 'center',
   padding: '2em',
 });
@@ -100,7 +95,7 @@ const DropdownTarget = styled('nav', {
   cursor: 'pointer',
   position: 'relative',
   '&:hover': {
-    [Dropdown]: {
+    [String(Dropdown)]: {
       display: 'flex',
     },
   },

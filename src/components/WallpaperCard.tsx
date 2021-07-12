@@ -25,60 +25,30 @@ export const WallpaperCard = ({
         </Link>
         {!standalone && (
           <>
+            <CgArrowLongRight size="42px" />
             {collection.map((collection) => (
-              <>
-                <CgArrowLongRight size="35px" />
-                <Link
-                  to={`c/${collection?.id}`}
-                  state={{back: window.location.pathname}}
-                >
-                  {collection?.name}
-                </Link>
-              </>
+              <Link
+                key={collection.id}
+                to={`c/${collection?.id}`}
+                state={{back: window.location.pathname}}
+              >
+                {collection?.name}
+              </Link>
             ))}
           </>
         )}
       </LinkContainer>
-      <PanZoom $src={u_url} element={<Image src={u_url} alt="" />} />
+      <PanZoom source={u_url} alt="" />
     </Container>
   );
 };
 
-function daysBetween(date1: Date, date2: Date) {
-  // The number of milliseconds in one day
-  const ONE_DAY = 1000 * 60 * 60 * 24;
-
-  // Calculate the difference in milliseconds
-  const differenceMs = Math.abs(date1.getTime() - date2.getTime());
-
-  // Convert back to days and return
-  return Math.round(differenceMs / ONE_DAY);
-}
-
 const Container = styled('div', {
   display: 'grid',
-  gridTemplateRows: '25px 500px',
-  width: '60vw',
-  paddingLeft: '10vw',
-  // height: 'auto',
+  gridTemplateRows: '33px 1fr',
   position: 'relative',
 });
 
 const LinkContainer = styled(Stack, {
   alignItems: 'center',
-});
-
-const Image = styled('img', {
-  width: '100%',
-  maxWidth: '100%',
-  height: 'auto',
-  // display: 'block',
-  cursor: 'zoom-in',
-  touchAction: 'none',
-  position: 'relative',
-  willChange: 'transform',
-
-  '&:hover': {
-    border: '1px solid blue',
-  },
 });

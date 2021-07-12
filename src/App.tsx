@@ -14,6 +14,7 @@ const globalStyles = global({
   '*': {margin: 0, padding: 0, boxSizing: 'border-box'},
   html: {
     maxWidth: '100vw',
+    backgroundColor: '#efefef',
   },
 });
 globalStyles();
