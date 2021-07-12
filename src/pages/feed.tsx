@@ -2,35 +2,37 @@ import {styled} from '@stitches/react';
 import React, {useState} from 'react';
 
 import {WallpaperCard} from '../components/WallpaperCard';
-import {useFeedQuery, QueryFeedArgs} from '../graphql/gen';
+import {useFeedQuery, PaginationArgs} from '../graphql/gen';
 
 type PageProps = {
-  variables: QueryFeedArgs;
+  variables: PaginationArgs;
   isLastPage: boolean;
   onLoadMore: (cursor: number) => void;
 };
 const Page = ({variables, isLastPage, onLoadMore}: PageProps) => {
   const [{data, fetching}] = useFeedQuery({
-    variables,
+    variables: {
+      where: variables,
+    },
   });
-
+  console.log({isLastPage});
   return (
     <>
       {data?.feed?.map((wp) => (
         <WallpaperCard key={wp.id} wallpaper={wp} />
       ))}
-      {(isLastPage && fetching) ||
-        (isLastPage && (
-          <button
-            onClick={() => {
-              if (data?.feed) {
-                onLoadMore(data.feed[data.feed.length - 1]?.id!);
-              }
-            }}
-          >
-            load more
-          </button>
-        ))}
+
+      {isLastPage && (
+        <button
+          onClick={() => {
+            if (data?.feed) {
+              onLoadMore(data.feed[data.feed.length - 1]?.id!);
+            }
+          }}
+        >
+          load more
+        </button>
+      )}
     </>
   );
 };
@@ -38,21 +40,20 @@ const Page = ({variables, isLastPage, onLoadMore}: PageProps) => {
 export const Feed = () => {
   const [pageVariables, setPageVariables] = useState([
     {
-      limit: 15,
+      take: 15,
       cursor: null as null | number,
     },
   ]);
 
   return (
     <Container>
-      {console.log('hello')}
       {pageVariables.map((variables, i) => (
         <Page
-          key={'' + variables.cursor}
+          key={variables.cursor}
           variables={variables}
-          isLastPage={i === pageVariables.length}
+          isLastPage={i === pageVariables.length - 1}
           onLoadMore={(cursor) =>
-            setPageVariables([...pageVariables, {cursor, limit: 15}])
+            setPageVariables([...pageVariables, {cursor, take: 15}])
           }
         />
       ))}
@@ -62,6 +63,8 @@ export const Feed = () => {
 
 const Container = styled('div', {
   display: 'grid',
-  // marginLeft: '20vw',
+  marginLeft: '10vw',
   gridRowGap: '50px',
+  gridTemplateColumns: '60vw',
+  gridTemplateRows: '650px',
 });
