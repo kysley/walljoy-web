@@ -4,6 +4,7 @@ import {useGesture} from 'react-use-gesture';
 import {useSpring, animated, to} from 'react-spring';
 
 import {useLockBodyScroll} from '../hooks';
+import {LazyImage} from './Image';
 
 export const Portal: React.FC = ({children}) => {
   const mount = document.getElementById('portal-root');
@@ -24,7 +25,7 @@ export const ScrollLock: React.FC = ({children}) => {
   return children;
 };
 
-const PanZoomModal = ({close, children, $src}) => {
+const PanZoomModal = ({close, $src}) => {
   const portalImageRef = useRef(null);
 
   useEffect(() => {
@@ -92,7 +93,7 @@ const PanZoomModal = ({close, children, $src}) => {
   );
 };
 
-export const PanZoom: React.FC = ({element, $src}) => {
+export const PanZoom: React.FC = ({source}) => {
   const [expanded, setExpanded] = useState(false);
 
   const handleImageClick = () => {
@@ -101,9 +102,11 @@ export const PanZoom: React.FC = ({element, $src}) => {
 
   return (
     <>
-      <div onClick={handleImageClick}>{element}</div>
+      <div onClick={handleImageClick}>
+        <LazyImage url={source} />
+      </div>
       {expanded && (
-        <PanZoomModal close={() => setExpanded(false)} $src={$src} />
+        <PanZoomModal close={() => setExpanded(false)} $src={source} />
       )}
     </>
   );
