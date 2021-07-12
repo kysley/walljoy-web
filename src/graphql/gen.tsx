@@ -85,8 +85,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   refreshCredentials: Credentials;
   register?: Maybe<Credentials>;
-  signin?: Maybe<Account>;
-  authenticateDevice?: Maybe<Scalars['Boolean']>;
+  authenticateSession?: Maybe<Scalars['Boolean']>;
 };
 
 export type MutationRefreshCredentialsArgs = {
@@ -97,18 +96,18 @@ export type MutationRegisterArgs = {
   input: LoginInput;
 };
 
-export type MutationAuthenticateDeviceArgs = {
-  pin?: Maybe<Scalars['String']>;
-  deviceId?: Maybe<Scalars['String']>;
+export type MutationAuthenticateSessionArgs = {
+  sId: Scalars['String'];
 };
 
 export type PaginationArgs = {
   take?: Scalars['Int'];
-  cursor: Scalars['Int'];
+  cursor?: Maybe<Scalars['Int']>;
 };
 
 export type Query = {
   __typename?: 'Query';
+  signin?: Maybe<Account>;
   feed?: Maybe<Array<Maybe<Wallpaper>>>;
   wallpapers?: Maybe<Array<Maybe<Wallpaper>>>;
   collection?: Maybe<Collection>;
@@ -162,15 +161,23 @@ export type RegisterMutation = {__typename?: 'Mutation'} & {
   >;
 };
 
-export type SigninMutationVariables = Exact<{[key: string]: never}>;
+export type AuthenticateSessionMutationVariables = Exact<{
+  sId: Scalars['String'];
+}>;
 
-export type SigninMutation = {__typename?: 'Mutation'} & {
-  signin?: Maybe<
-    {__typename?: 'Account'} & Pick<Account, 'email' | 'id'> & {
-        devices: Array<
-          {__typename?: 'Device'} & Pick<Device, 'name' | 'id' | 'authorized'>
-        >;
-      }
+export type AuthenticateSessionMutation = {__typename?: 'Mutation'} & Pick<
+  Mutation,
+  'authenticateSession'
+>;
+
+export type RefreshCredentialsMutationVariables = Exact<{
+  refreshToken: Scalars['String'];
+}>;
+
+export type RefreshCredentialsMutation = {__typename?: 'Mutation'} & {
+  refreshCredentials: {__typename?: 'Credentials'} & Pick<
+    Credentials,
+    'token' | 'refreshToken'
   >;
 };
 
@@ -244,6 +251,18 @@ export type FeedQuery = {__typename?: 'Query'} & {
   >;
 };
 
+export type SigninQueryVariables = Exact<{[key: string]: never}>;
+
+export type SigninQuery = {__typename?: 'Query'} & {
+  signin?: Maybe<
+    {__typename?: 'Account'} & Pick<Account, 'email' | 'id'> & {
+        devices: Array<
+          {__typename?: 'Device'} & Pick<Device, 'name' | 'id' | 'authorized'>
+        >;
+      }
+  >;
+};
+
 export const RegisterDocument = gql`
   mutation register($input: LoginInput!) {
     register(input: $input) {
@@ -258,24 +277,32 @@ export function useRegisterMutation() {
     RegisterDocument,
   );
 }
-export const SigninDocument = gql`
-  mutation signin {
-    signin {
-      email
-      id
-      devices {
-        name
-        id
-        authorized
-      }
+export const AuthenticateSessionDocument = gql`
+  mutation AuthenticateSession($sId: String!) {
+    authenticateSession(sId: $sId)
+  }
+`;
+
+export function useAuthenticateSessionMutation() {
+  return Urql.useMutation<
+    AuthenticateSessionMutation,
+    AuthenticateSessionMutationVariables
+  >(AuthenticateSessionDocument);
+}
+export const RefreshCredentialsDocument = gql`
+  mutation RefreshCredentials($refreshToken: String!) {
+    refreshCredentials(refreshToken: $refreshToken) {
+      token
+      refreshToken
     }
   }
 `;
 
-export function useSigninMutation() {
-  return Urql.useMutation<SigninMutation, SigninMutationVariables>(
-    SigninDocument,
-  );
+export function useRefreshCredentialsMutation() {
+  return Urql.useMutation<
+    RefreshCredentialsMutation,
+    RefreshCredentialsMutationVariables
+  >(RefreshCredentialsDocument);
 }
 export const WallpapersDocument = gql`
   query wallpapers($where: PaginationArgs) {
@@ -354,4 +381,23 @@ export function useFeedQuery(
   options: Omit<Urql.UseQueryArgs<FeedQueryVariables>, 'query'> = {},
 ) {
   return Urql.useQuery<FeedQuery>({query: FeedDocument, ...options});
+}
+export const SigninDocument = gql`
+  query signin {
+    signin {
+      email
+      id
+      devices {
+        name
+        id
+        authorized
+      }
+    }
+  }
+`;
+
+export function useSigninQuery(
+  options: Omit<Urql.UseQueryArgs<SigninQueryVariables>, 'query'> = {},
+) {
+  return Urql.useQuery<SigninQuery>({query: SigninDocument, ...options});
 }

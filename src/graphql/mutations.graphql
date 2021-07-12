@@ -5,14 +5,13 @@ mutation register($input: LoginInput!) {
   }
 }
 
-mutation signin {
-  signin {
-    email
-    id
-    devices {
-      name
-      id
-      authorized
-    }
+mutation AuthenticateSession($sId: String!) {
+  authenticateSession(sId: $sId)
+}
+
+mutation RefreshCredentials($refreshToken: String!) {
+  refreshCredentials(refreshToken: $refreshToken) {
+    token
+    refreshToken
   }
 }

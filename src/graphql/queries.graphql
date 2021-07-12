@@ -42,3 +42,15 @@ query Feed($where: PaginationArgs) {
     }
   }
 }
+
+query signin {
+  signin {
+    email
+    id
+    devices {
+      name
+      id
+      authorized
+    }
+  }
+}
